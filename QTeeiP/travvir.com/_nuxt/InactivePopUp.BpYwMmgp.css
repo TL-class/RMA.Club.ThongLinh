@@ -1,0 +1,99 @@
+.inactive-popup[data-v-fdb2ac4d] {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    -ms-backdrop-filter: blur(10px);
+    -o-backdrop-filter: blur(10px);
+    background: #0000007a;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 10px #0000001a;
+    color: #fff
+}
+
+@media screen and (max-width: 750px) {
+    .inactive-popup[data-v-fdb2ac4d] {
+        background:#0000007a
+    }
+}
+
+.inactive-overlay[data-v-fdb2ac4d] {
+    align-items: center;
+    display: flex;
+    font-family: ui-sans-serif,-apple-system,system-ui,Segoe UI,Helvetica,Apple Color Emoji,Arial,sans-serif,Segoe UI Emoji,Segoe UI Symbol;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    top: 1rem;
+    transform: translate(-50%);
+    z-index: 1000
+}
+
+.inactive-overlay.isPortrait[data-v-fdb2ac4d] {
+    width: 100%
+}
+
+.inactive-overlay.isPortrait .inactive-popup[data-v-fdb2ac4d] {
+    width: 70%
+}
+
+.inactive-popup[data-v-fdb2ac4d] {
+    border-radius: 4px;
+    color: #ffffffe6;
+    max-width: 32rem;
+    padding: 1.1rem 1.15rem .85rem;
+    text-align: left;
+    width: 100%
+}
+
+.inactive-header[data-v-fdb2ac4d] {
+    margin-bottom: .85rem
+}
+
+.inactive-brand[data-v-fdb2ac4d] {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -.02em
+}
+
+.inactive-title[data-v-fdb2ac4d] {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0 0 .5rem
+}
+
+.inactive-title svg[data-v-fdb2ac4d] {
+    color: red;
+    height: 14px;
+    width: 14px
+}
+
+.inactive-message[data-v-fdb2ac4d] {
+    font-size: .875rem;
+    line-height: 1.4;
+    margin: 0
+}
+
+.inactive-footer[data-v-fdb2ac4d] {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: .15rem
+}
+
+.inactive-ok-btn[data-v-fdb2ac4d] {
+    background: #ffffff1a;
+    border: 1px solid hsla(0,0%,100%,.2);
+    border-radius: 4px;
+    color: #ffffffe6;
+    cursor: pointer;
+    font-size: .875rem;
+    font-weight: 500;
+    min-width: 4.5rem;
+    padding: .35rem 1rem;
+    transition: background .15s ease
+}
+
+.inactive-ok-btn[data-v-fdb2ac4d]:hover {
+    background: #fff3
+}

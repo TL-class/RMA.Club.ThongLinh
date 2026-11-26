@@ -1,0 +1,40 @@
+.loading-container[data-v-8f0d645e] {
+    background-color: #000;
+    z-index: 20000
+}
+
+.is-parent[data-v-8f0d645e],.loading-container[data-v-8f0d645e] {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%
+}
+
+.is-parent[data-v-8f0d645e],.loading-container[data-v-8f0d645e],.loading-spinner[data-v-8f0d645e] {
+    align-items: center;
+    display: flex;
+    justify-content: center
+}
+
+.loading-spinner[data-v-8f0d645e] {
+    height: 50px;
+    width: 50px
+}
+
+.spinner[data-v-8f0d645e] {
+    animation: spin-8f0d645e 1s linear infinite;
+    border-bottom: 4px solid gray;
+    height: 40px;
+    width: 40px
+}
+
+@keyframes spin-8f0d645e {
+    0% {
+        transform: rotate(0)
+    }
+
+    to {
+        transform: rotate(1turn)
+    }
+}

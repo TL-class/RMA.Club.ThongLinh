@@ -1,0 +1,27 @@
+/* UI components: search, stats, cards, directory */
+.database-toolbar{position:relative;overflow:visible}
+.search-panel{position:relative;z-index:20}
+.search-box{box-shadow:0 8px 25px rgba(0,28,128,.08);transition:border-color .2s,box-shadow .2s,transform .2s}
+.search-box:focus-within{border-color:var(--blue-2);box-shadow:0 0 0 4px rgba(34,85,224,.10),0 12px 30px rgba(0,28,128,.10);transform:translateY(-1px)}
+.search-suggestions{max-height:320px;overflow:auto;border-radius:12px}
+.search-suggestion{transition:background .15s,transform .15s}
+.search-suggestion:hover{transform:translateX(2px)}
+.db-stats span{white-space:nowrap}
+.result-summary{margin:10px 0 12px;padding:10px 13px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--sub);font-size:13px}
+.result-summary b{color:var(--blue)}
+.card{position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--blue),#6b8df0);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.card:hover:before{transform:scaleX(1)}
+.card-tags span{transition:background .2s,color .2s}
+.card-tags span:hover{background:var(--blue-light);color:var(--blue)}
+.filters{position:sticky;top:78px;z-index:10;padding:8px 0;background:rgba(248,250,252,.92);backdrop-filter:blur(10px)}
+body.dark .filters{background:rgba(11,18,32,.92)}
+.legend{padding-top:4px}
+.directory-note>div{transition:transform .2s,box-shadow .2s}
+.directory-note>div:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(0,28,128,.08)}
+
+@media(max-width:650px){
+  .filters{top:68px;overflow:auto;white-space:nowrap;display:flex;flex-wrap:nowrap}
+  .filter{flex:0 0 auto}
+  .db-stats{grid-template-columns:1fr}
+}
