@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCIIquarium Deluxe — Bể Cá Nghệ Thuật Ký Tự Trực Tuyến</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ===== Vietnam Clock Overlay Widget ===== */
+    .vn-clock-widget {
+      --clock-accent: #e95420;
+      --clock-text: #f3f4f6;
+      --clock-sub: rgba(243, 244, 246, 0.72);
+      --clock-bg: rgba(24, 12, 28, 0.58);
+      --clock-border: rgba(233, 84, 32, 0.45);
+      --clock-glow: rgba(233, 84, 32, 0.35);
+
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      z-index: 12;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: var(--clock-bg);
+      border: 1px solid var(--clock-border);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 18px var(--clock-glow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--clock-text);
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.3s ease;
+    }
+
+    .vn-clock-widget.clock-hidden {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.96);
+      visibility: hidden;
+    }
+
+    /* Đồng bộ màu mặt đồng hồ theo 5 theme */
+    body.theme-abyss .vn-clock-widget {
+      --clock-accent: #38bdf8;
+      --clock-bg: rgba(4, 18, 38, 0.6);
+      --clock-border: rgba(56, 189, 248, 0.45);
+      --clock-glow: rgba(56, 189, 248, 0.3);
+    }
+
+    body.theme-reef .vn-clock-widget {
+      --clock-accent: #2dd4bf;
+      --clock-bg: rgba(6, 36, 44, 0.58);
+      --clock-border: rgba(45, 212, 191, 0.45);
+      --clock-glow: rgba(45, 212, 191, 0.3);
+    }
+
+    body.theme-crt .vn-clock-widget {
+      --clock-accent: #4ade80;
+      --clock-text: #86efac;
+      --clock-sub: rgba(134, 239, 172, 0.75);
+      --clock-bg: rgba(3, 20, 8, 0.68);
+      --clock-border: rgba(74, 222, 128, 0.5);
+      --clock-glow: rgba(74, 222, 128, 0.35);
+    }
+
+    body.theme-cyber .vn-clock-widget {
+      --clock-accent: #f43f5e;
+      --clock-text: #fdf2f8;
+      --clock-sub: rgba(103, 232, 249, 0.85);
+      --clock-bg: rgba(20, 8, 36, 0.65);
+      --clock-border: rgba(244, 63, 94, 0.55);
+      --clock-glow: rgba(244, 63, 94, 0.35);
+    }
+
+    /* Mặt đồng hồ kim SVG */
+    .vn-clock-face {
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 6px var(--clock-glow));
+    }
+
+    .vn-clock-face .dial-ring {
+      fill: rgba(0, 0, 0, 0.28);
+      stroke: var(--clock-accent);
+      stroke-width: 2.2;
+    }
+
+    .vn-clock-face .dial-tick {
+      stroke: var(--clock-sub);
+      stroke-width: 1.4;
+      stroke-linecap: round;
+    }
+
+    .vn-clock-face .dial-tick.major {
+      stroke: var(--clock-text);
+      stroke-width: 2.2;
+    }
+
+    .vn-clock-face .hand-hour {
+      stroke: var(--clock-text);
+      stroke-width: 3.2;
+      stroke-linecap: round;
+    }
+
+    .vn-clock-face .hand-minute {
+      stroke: var(--clock-text);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+
+    .vn-clock-face .hand-second {
+      stroke: var(--clock-accent);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+
+    .vn-clock-face .center-pin {
+      fill: var(--clock-accent);
+      stroke: var(--clock-text);
+      stroke-width: 1;
+    }
+
+    /* Phần hiển thị giờ số & ngày Việt Nam */
+    .vn-clock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 138px;
+    }
+
+    .vn-clock-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--clock-accent);
+      font-weight: 700;
+    }
+
+    .vn-clock-digital {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: 0.04em;
+      color: var(--clock-text);
+      text-shadow: 0 0 10px var(--clock-glow);
+    }
+
+    .vn-clock-date {
+      font-size: 11px;
+      color: var(--clock-sub);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 640px) {
+      .vn-clock-widget {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        gap: 10px;
+      }
+      .vn-clock-face {
+        width: 54px;
+        height: 54px;
+      }
+      .vn-clock-digital {
+        font-size: 18px;
+      }
+      .vn-clock-info {
+        min-width: 112px;
+      }
+    }
+  </style>
+</head>
+<body class="theme-ubuntu">
+  <!-- Top OS Desktop Bar (Ubuntu GNOME style) -->
+  <header class="os-topbar" id="osTopbar">
+    <div class="os-left">
+      <span class="os-pill active">Activities</span>
+      <span class="os-app-title">
+        <span class="dot-indicator"></span>
+        Terminal — asciiquarium --deluxe --species=22
+      </span>
+    </div>
+    <div class="os-center" id="osClock">Wed Nov 25 17:02</div>
+    <div class="os-right">
+      <span class="os-badge" id="creatureCountBadge">🐟 24 sinh vật</span>
+      <span class="os-badge" id="fpsBadge">60 FPS</span>
+      <button class="os-icon-btn" id="btnHelp" title="Danh sách 22 sinh vật & Hướng dẫn (?)">?</button>
+      <button class="os-icon-btn" id="btnHideHud" title="Ẩn thanh công cụ (Phím H)">⛶</button>
+    </div>
+  </header>
+
+  <!-- Main Terminal Window -->
+  <main class="desktop-stage" id="desktopStage">
+    <section class="terminal-window" id="terminalWindow">
+      <!-- Terminal Title Bar -->
+      <div class="terminal-header">
+        <div class="window-controls">
+          <span class="win-btn close" title="Làm mới bể cá" id="btnReset"></span>
+          <span class="win-btn minimize" title="Ẩn HUD (Phím H)" id="btnMinimize"></span>
+          <span class="win-btn maximize" title="Toàn màn hình (Phím F)" id="btnMaximize"></span>
+        </div>
+        <div class="terminal-tabs">
+          <div class="tab active">
+            <span class="tab-icon">&gt;_</span>
+            <span>aquarium@ocean: ~/asciiquarium --ecosystem=deluxe</span>
+          </div>
+          <div class="tab secondary" id="btnSpawnMenu">
+            <span>+ Thả từng loài (22 loài)</span>
+          </div>
+        </div>
+        <div class="terminal-actions-mini">
+          <span class="hint-text">Click mặt nước để cho cá ăn • Phím <b>H</b> ẩn UI • Phím <b>C</b> bật/tắt đồng hồ</span>
+        </div>
+      </div>
+
+      <!-- Boot Terminal Overlay -->
+      <div class="boot-overlay" id="bootOverlay">
+        <div class="boot-text" id="bootText"></div>
+      </div>
+
+      <!-- Aquarium Canvas Container -->
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="aquariumCanvas"></canvas>
+        <div class="crt-scanlines" aria-hidden="true"></div>
+        <div class="water-vignette" aria-hidden="true"></div>
+
+        <!-- Vietnam Clock Face Overlay (Toggleable) -->
+        <div class="vn-clock-widget" id="vnClockWidget" aria-label="Đồng hồ giờ Việt Nam">
+          <svg class="vn-clock-face" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="dial-ring" cx="50" cy="50" r="46" />
+            <!-- 12 vạch giờ -->
+            <g id="vnClockTicks"></g>
+            <!-- Kim đồng hồ -->
+            <line id="vnHourHand" class="hand-hour" x1="50" y1="50" x2="50" y2="26" />
+            <line id="vnMinuteHand" class="hand-minute" x1="50" y1="50" x2="50" y2="17" />
+            <line id="vnSecondHand" class="hand-second" x1="50" y1="56" x2="50" y2="14" />
+            <circle class="center-pin" cx="50" cy="50" r="3.2" />
+          </svg>
+          <div class="vn-clock-info">
+            <span class="vn-clock-label">GIỜ VIỆT NAM • UTC+7</span>
+            <span class="vn-clock-digital" id="vnClockDigital">--:--:--</span>
+            <span class="vn-clock-date" id="vnClockDate">Đang cập nhật...</span>
+          </div>
+        </div>
+
+        <!-- Floating Quick Spawn Popover -->
+        <div class="spawn-popover hidden" id="spawnPopover">
+          <div class="popover-header">
+            <span>🐠 Chọn sinh vật thả vào bể</span>
+            <button id="closePopover" aria-label="Đóng">✕</button>
+          </div>
+          <div class="spawn-grid" id="spawnGrid"></div>
+        </div>
+      </div>
+
+      <!-- Interactive Control Dock -->
+      <footer class="control-dock" id="controlDock">
+        <div class="dock-group">
+          <button class="dock-btn primary" id="btnFeed" title="Rải thức ăn khắp bể (Phím Space)">
+            <span>🍤</span> Cho ăn
+          </button>
+          <button class="dock-btn" id="btnAddFish" title="Thêm đàn cá nhiệt đới ngẫu nhiên">
+            <span>🐠</span> + Đàn cá
+          </button>
+          <button class="dock-btn" id="btnAddShark" title="Gọi Cá Mập / Kỳ Lân Biển">
+            <span>🦈</span> + Cá mập
+          </button>
+          <button class="dock-btn" id="btnAddWhale" title="Gọi Cá Voi / Thuyền Buồm">
+            <span>🐋</span> + Cá voi / Tàu
+          </button>
+          <button class="dock-btn" id="btnAddJelly" title="Thêm Sứa, Rùa, Cá Heo & Tiên Cá">
+            <span>🐬</span> + Sinh vật hiếm
+          </button>
+          <button class="dock-btn" id="btnBubbles" title="Tạo luồng bong bóng lớn (Phím B)">
+            <span>🫧</span> Bong bóng
+          </button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <div class="dock-group">
+          <label class="theme-selector-wrap" title="Đổi giao diện màu sắc">
+            <span>🎨</span>
+            <select id="themeSelect">
+              <option value="ubuntu">Ubuntu Terminal (Tím)</option>
+              <option value="abyss">Biển Sâu Phát Quang</option>
+              <option value="reef">Rạn San Hô Nhiệt Đới</option>
+              <option value="crt">Màn Hình CRT Xanh Cổ Điển</option>
+              <option value="cyber">Cyberpunk Neon</option>
+            </select>
+          </label>
+
+          <button class="dock-btn" id="btnClock" title="Bật/tắt mặt đồng hồ giờ Việt Nam (Phím C)">
+            <span>🕒</span> Đồng hồ: <b id="clockState">BẬT</b>
+          </button>
+
+          <button class="dock-btn" id="btnGlow" title="Bật/tắt hiệu ứng phát sáng Neon">
+            <span>✨</span> Phát sáng: <b id="glowState">BẬT</b>
+          </button>
+
+          <button class="dock-btn" id="btnSound" title="Bật/tắt âm thanh đại dương">
+            <span id="soundIcon">🔇</span> <span id="soundState">Âm thanh</span>
+          </button>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Floating Restore Button when HUD is hidden -->
+  <button class="floating-restore hidden" id="btnRestoreHud" title="Hiện lại thanh điều khiển (Phím H)">
+    ⌘ Hiện điều khiển
+  </button>
+
+  <!-- Species Encyclopedia & Shortcuts Modal -->
+  <div class="modal-backdrop hidden" id="helpModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>🌊 Bách Khoa Sinh Vật ASCIIquarium Deluxe (22 Loài)</h2>
+        <button class="modal-close" id="closeHelpModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">
+          Lấy cảm hứng từ lệnh <code>asciiquarium</code> kinh điển trên Linux Terminal, phiên bản web nâng cấp với hiệu ứng ánh sáng dưới nước, vật lý dòng chảy, và hệ sinh thái 22 loài sinh vật biển & tàu thuyền ASCII đa sắc màu.
+        </p>
+
+        <div class="shortcut-bar">
+          <span><kbd>Click</kbd> Thả mồi / Chọc cá nóc</span>
+          <span><kbd>Space</kbd> Rải thức ăn</span>
+          <span><kbd>H</kbd> Chế độ Screensaver</span>
+          <span><kbd>F</kbd> Toàn màn hình</span>
+          <span><kbd>B</kbd> Phun bong bóng</span>
+          <span><kbd>C</kbd> Bật/tắt đồng hồ VN</span>
+        </div>
+
+        <h3>Danh mục 22 sinh vật & phương tiện trong bể</h3>
+        <div class="encyclopedia-grid" id="encyclopediaGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/creatures.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/engine.js"></script>
+  <script>
+    (function initVietnamClock() {
+      const STORAGE_KEY = 'asciiquarium_vn_clock_visible';
+      const widget = document.getElementById('vnClockWidget');
+      const btnClock = document.getElementById('btnClock');
+      const clockState = document.getElementById('clockState');
+      const digitalEl = document.getElementById('vnClockDigital');
+      const dateEl = document.getElementById('vnClockDate');
+      const hourHand = document.getElementById('vnHourHand');
+      const minuteHand = document.getElementById('vnMinuteHand');
+      const secondHand = document.getElementById('vnSecondHand');
+      const ticksGroup = document.getElementById('vnClockTicks');
+
+      // Tạo 12 vạch giờ cho mặt đồng hồ SVG
+      if (ticksGroup) {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        for (let i = 0; i < 12; i++) {
+          const isMajor = i % 3 === 0;
+          const line = document.createElementNS(svgNS, 'line');
+          line.setAttribute('x1', '50');
+          line.setAttribute('y1', isMajor ? '8' : '9');
+          line.setAttribute('x2', '50');
+          line.setAttribute('y2', isMajor ? '16' : '13.5');
+          line.setAttribute('transform', `rotate(${i * 30} 50 50)`);
+          line.setAttribute('class', isMajor ? 'dial-tick major' : 'dial-tick');
+          ticksGroup.appendChild(line);
+        }
+      }
+
+      // Bộ định dạng chuẩn múi giờ Việt Nam (Asia/Ho_Chi_Minh, UTC+7)
+      const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      const dateFormatter = new Intl.DateTimeFormat('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      function updateVietnamClock() {
+        const now = new Date();
+        const parts = timeFormatter.formatToParts(now);
+        const hStr = parts.find(p => p.type === 'hour')?.value || '00';
+        const mStr = parts.find(p => p.type === 'minute')?.value || '00';
+        const sStr = parts.find(p => p.type === 'second')?.value || '00';
+
+        const h = parseInt(hStr, 10);
+        const m = parseInt(mStr, 10);
+        const s = parseInt(sStr, 10);
+
+        // Cập nhật giờ số và ngày tháng tiếng Việt
+        digitalEl.textContent = `${hStr}:${mStr}:${sStr}`;
+        const rawDate = dateFormatter.format(now);
+        dateEl.textContent = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
+
+        // Xoay các kim trên mặt đồng hồ
+        const secAngle = s * 6;
+        const minAngle = m * 6 + s * 0.1;
+        const hourAngle = (h % 12) * 30 + m * 0.5;
+
+        hourHand.setAttribute('transform', `rotate(${hourAngle} 50 50)`);
+        minuteHand.setAttribute('transform', `rotate(${minAngle} 50 50)`);
+        secondHand.setAttribute('transform', `rotate(${secAngle} 50 50)`);
+      }
+
+      // Khôi phục trạng thái bật/tắt đã lưu
+      let isClockVisible = localStorage.getItem(STORAGE_KEY) !== 'false';
+
+      function applyVisibility() {
+        widget.classList.toggle('clock-hidden', !isClockVisible);
+        clockState.textContent = isClockVisible ? 'BẬT' : 'TẮT';
+        btnClock.setAttribute('aria-pressed', String(isClockVisible));
+      }
+
+      function toggleClock() {
+        isClockVisible = !isClockVisible;
+        localStorage.setItem(STORAGE_KEY, String(isClockVisible));
+        applyVisibility();
+      }
+
+      btnClock.addEventListener('click', toggleClock);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const tag = e.target?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (e.key === 'c' || e.key === 'C') {
+          toggleClock();
+        }
+      });
+
+      applyVisibility();
+      updateVietnamClock();
+      setInterval(updateVietnamClock, 250);
+    })();
+  </script>
+</body>
+</html>

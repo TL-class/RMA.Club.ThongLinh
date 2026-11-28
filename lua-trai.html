@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WINTER NIGHT — Chill Edition</title>
+  <link rel="stylesheet" href="css/style1.css" />
+</head>
+<body>
+  <canvas id="sceneCanvas"></canvas>
+
+  <!-- Nhạc nền Last Christmas -->
+  <audio id="bgMusic" src="last-christmas.mp3" loop preload="auto"></audio>
+  <input type="file" id="customAudioInput" accept="audio/*" hidden />
+
+  <!-- Thanh hướng dẫn phía trên -->
+  <div id="topHint" class="top-hint">
+    Click bầu trời để gọi sao băng &bull; Click đống lửa / Space để thêm củi &bull; [M] Bật/tắt nhạc &bull; [F] Toàn màn hình &bull; [H] Ẩn thanh điều khiển
+  </div>
+
+  <!-- Thông báo trạng thái nhỏ khi cần -->
+  <div id="toastMsg" class="toast-msg hidden"></div>
+
+  <!-- Thanh điều khiển phía dưới -->
+  <div id="bottomBar" class="bottom-bar">
+    <div class="status-info" id="statusInfo">
+      <span class="brand">&#10022; WINTER NIGHT</span>
+      <span class="sep">|</span>
+      <span>Gió <strong id="valWind">0.8</strong></span>
+      <span class="sep">|</span>
+      <span>Tuyết <strong id="valSnow">1.1</strong></span>
+      <span class="sep">|</span>
+      <span>Lửa <strong id="valFire">1.2</strong></span>
+      <span class="sep">|</span>
+      <span>Tốc độ <strong id="valSpeed">1.00</strong></span>
+    </div>
+
+    <div class="controls-group">
+      <button class="ctrl-btn" id="btnWindDown" title="Giảm gió">Gió -</button>
+      <button class="ctrl-btn" id="btnWindUp" title="Tăng gió">Gió +</button>
+
+      <button class="ctrl-btn" id="btnSnowDown" title="Giảm tuyết">Tuyết -</button>
+      <button class="ctrl-btn" id="btnSnowUp" title="Tăng tuyết">Tuyết +</button>
+
+      <button class="ctrl-btn" id="btnFireDown" title="Giảm lửa">Lửa -</button>
+      <button class="ctrl-btn" id="btnFireUp" title="Tăng lửa">Lửa +</button>
+
+      <button class="ctrl-btn active" id="btnAurora" title="Bật/tắt cực quang">Cực quang</button>
+      <button class="ctrl-btn active" id="btnFireflies" title="Bật/tắt đom đóm">Đom đóm</button>
+
+      <button class="ctrl-btn" id="btnStoke" title="Thêm củi (Space)">Thêm củi</button>
+      <button class="ctrl-btn" id="btnMeteor" title="Gọi sao băng">Sao băng</button>
+
+      <div class="audio-group">
+        <button class="ctrl-btn" id="btnAudio" title="Bật/tắt nhạc Last Christmas [M]">Âm thanh: Tắt</button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.85" title="Âm lượng nhạc" />
+        <button class="ctrl-btn icon-btn" id="btnPickSong" title="Chọn bài nhạc khác từ máy">&#127925;</button>
+      </div>
+
+      <button class="ctrl-btn" id="btnFullscreen" title="Toàn màn hình [F]">Toàn màn hình</button>
+      <button class="ctrl-btn" id="btnPause" title="Tạm dừng / Tiếp tục [P]">Tạm dừng</button>
+    </div>
+  </div>
+
+  <script src="js/script1.js"></script>
+</body>
+</html>
