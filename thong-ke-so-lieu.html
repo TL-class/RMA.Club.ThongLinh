@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê &amp; Phân tích Số liệu - RMA CLUB</title>
+  <meta name="description" content="Phần mềm thống kê, hồi quy và xác suất trực tuyến của RMA CLUB - Câu lạc bộ Robot & Toán học Ứng dụng THPT Thống Linh.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+  <link rel="stylesheet" href="rma-header.css">
+  <link rel="stylesheet" href="rma-items.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Reset & Cơ bản */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; display: flex; flex-direction: column; }
+    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #333; background: #f4f6fb; }
+    body > *:not(footer) { flex-shrink: 0; }
+    img { max-width: 100%; display: block; }
+
+    /* Hero Banner - Tránh bị header che mất nửa trên và giữ chữ trắng */
+    .stat-hero {
+      background: linear-gradient(135deg, #001c80 0%, #1e40af 100%) !important;
+      color: #ffffff !important;
+      padding: 85px 20px 65px !important;
+      text-align: center;
+      margin-top: 0 !important;
+    }
+    .stat-hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #ffffff !important;
+    }
+    .stat-hero p {
+      max-width: 780px;
+      margin: 0 auto;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    /* Container chính */
+    .stat-container {
+      width: 92%;
+      max-width: 1200px;
+      margin: -34px auto 45px;
+    }
+    .stat-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(0, 28, 128, 0.08);
+      border: 1px solid #e2e8f0;
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+
+    /* Thanh tùy chọn toàn cục */
+    .toolbar-global {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #f4f6fb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #e1e6f5;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .toolbar-global select, .toolbar-global input[type="number"] {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    /* Tabs chức năng */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #e6eaf5;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 11px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      transition: .25s;
+      margin-bottom: -2px;
+    }
+    .tab-btn:hover { color: #001c80; }
+    .tab-btn.active {
+      color: #001c80;
+      border-bottom-color: #001c80;
+      background: #f4f6fb;
+      border-radius: 8px 8px 0 0;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+    /* Hộp nhập liệu */
+    .input-box {
+      background: #f4f6fb;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #e1e6f5;
+    }
+    .input-box label { display: block; font-weight: 600; color: #001c80; margin-bottom: 8px; font-size: 14px; }
+    .input-box textarea,
+    .input-box input[type="number"],
+    .input-box input[type="text"],
+    .input-box select {
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      transition: border-color .2s;
+    }
+    .input-box textarea { width: 100%; min-height: 100px; resize: vertical; }
+    .input-box textarea:focus, .input-box input:focus, .input-box select:focus {
+      outline: none;
+      border-color: #001c80;
+      box-shadow: 0 0 0 3px rgba(0, 28, 128, .1);
+    }
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #d3dcf5;
+      align-items: center;
+      font-size: 14px;
+    }
+    .options-row label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 500; color: #333; cursor: pointer; }
+    .action-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; align-items: center; }
+    #csvFileInput { display: none; }
+
+    /* Nút bấm - Khắc phục lỗi bị rma-items.css đè nền xanh làm mất chữ */
+    .stat-container .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      background: #001c80 !important;
+      color: #ffffff !important;
+      padding: 9px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      border: 1.5px solid #001c80 !important;
+      cursor: pointer;
+      transition: .25s;
+    }
+    .stat-container .btn:hover {
+      background: #0034c2 !important;
+      border-color: #0034c2 !important;
+      color: #ffffff !important;
+    }
+    .stat-container .btn.btn-outline {
+      background: #ffffff !important;
+      color: #001c80 !important;
+      border: 1.5px solid #001c80 !important;
+    }
+    .stat-container .btn.btn-outline:hover {
+      background: #eef2ff !important;
+      color: #001c80 !important;
+    }
+    .stat-container .btn.btn-danger {
+      background: #c62828 !important;
+      border-color: #c62828 !important;
+      color: #ffffff !important;
+    }
+    .stat-container .btn.btn-danger:hover {
+      background: #a81f1f !important;
+      border-color: #a81f1f !important;
+      color: #ffffff !important;
+    }
+    .stat-container .btn.btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    /* Form grid tab Xác suất */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .form-grid .field input, .form-grid .field select { width: 100%; }
+
+    /* Bảng dữ liệu */
+    .table-responsive { overflow-x: auto; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .data-table th, .data-table td {
+      padding: 9px 11px;
+      border: 1px solid #e1e6f5;
+      text-align: center;
+      font-size: 14px;
+    }
+    .data-table th { background: #001c80; color: #fff; font-weight: 600; }
+    .data-table tbody tr:nth-child(even) { background: #f9faff; }
+    .data-table input { width: 100%; min-width: 75px; text-align: center; padding: 6px 8px; }
+    .remove-row-btn {
+      background: #fdecea;
+      color: #c62828;
+      border: 1px solid #f5c6cb;
+      padding: 5px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .remove-row-btn:hover { background: #c62828; color: #fff; }
+
+    /* Kết quả */
+    .results-section { display: none; animation: fadeIn 0.35s ease; }
+    .results-section.visible { display: block; }
+    .sub-heading {
+      font-size: 19px;
+      color: #001c80;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e6eaf5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .metric-card {
+      background: #f4f6fb;
+      border-left: 4px solid #001c80;
+      padding: 13px 15px;
+      border-radius: 10px;
+      transition: transform .2s;
+    }
+    .metric-card:hover { transform: translateY(-2px); }
+    .metric-label { font-size: 12.5px; color: #555; font-weight: 600; margin-bottom: 3px; }
+    .metric-value { font-size: 20px; font-weight: 700; color: #001c80; word-break: break-word; }
+    .metric-note { font-size: 12px; color: #666; margin-top: 3px; }
+
+    /* Biểu đồ & Bảng */
+    .visual-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; margin-top: 18px; }
+    .visual-grid.single-col { grid-template-columns: 1fr; }
+    .panel-card {
+      background: #fff;
+      border: 1px solid #e1e6f5;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+    }
+    .chart-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chart-type-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chart-container { position: relative; height: 350px; width: 100%; }
+
+    /* Khối dự báo hồi quy */
+    .predict-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      background: #eef2ff;
+      border: 1px solid #c5d1fa;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .predict-box input { width: 130px; padding: 6px 10px; border: 1px solid #001c80; border-radius: 6px; }
+
+    /* Thông báo */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14.5px;
+      font-weight: 600;
+      margin: 14px 0;
+      text-align: center;
+      animation: fadeIn 0.35s ease;
+    }
+    .alert-success { background: #e6f9ed; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .alert-danger { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; }
+    .alert-info { background: #eef2ff; color: #001c80; border: 1px solid #c5d1fa; text-align: left; font-weight: 500; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Footer gốc */
+    footer { background: #252935; color: #fff; padding: 50px 20px; text-align: center; margin-top: auto; }
+    footer .footer-container { max-width: 1200px; margin: auto; }
+    footer h3 { margin-bottom: 15px; font-size: 20px; font-weight: 700; }
+    footer p, footer a { font-size: 15px; }
+    footer .social { margin: 20px 0; }
+    footer .social a {
+      color: #fff; margin: 0 10px; font-size: 22px; transition: transform .3s, color .3s;
+    }
+    footer .social a:hover { transform: translateY(-4px); color: #ffd700; }
+    footer small { display: block; margin-top: 20px; font-size: 14px; opacity: .8; }
+
+    /* Responsive */
+    @media(max-width: 900px) { .visual-grid { grid-template-columns: 1fr; } }
+    @media(max-width: 768px) {
+      .stat-card { padding: 18px 14px; }
+      .stat-hero h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header gốc của RMA CLUB -->
+  <div class="rma-topbar">Câu lạc bộ Robot &amp; Toán học Ứng dụng - THPT Thống Linh &nbsp;·&nbsp; rmathonglinh@gmail.com</div>
+  <header class="rma-site-header">
+    <div class="rma-header-inner">
+      <a class="rma-logo" href="index.html">RMA CLUB <span class="rma-logo-badge">TL</span></a>
+      <button class="rma-menu-toggle" type="button" aria-label="Mở menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
+      <nav class="rma-nav" aria-label="Menu chính">
+        <a href="index.html">Trang chủ</a>
+        <a href="thongtin.html">Thông tin</a>
+        <a href="danh-sach-hoat-dong.html">Hoạt động</a>
+        <a href="duan.html" class="active">Dự án</a>
+        <a href="thamgia.html">Tham gia</a>
+        <a href="phan-biet-nam.html">Phân biệt nấm</a>
+      </nav> 
+    </div>
+  </header>
+
+  <!-- Banner tiêu đề chữ màu trắng -->
+  <section class="stat-hero">
+    <h1>Phần mềm Thống kê &amp; Phân tích Số liệu</h1>
+    <p>Tích hợp thống kê mô tả nâng cao, mẫu ghép nhóm (SGK Toán 11–12), hồi quy đa mô hình và phân phối xác suất.</p>
+  </section>
+
+  <!-- Nội dung chính -->
+  <main class="stat-container">
+    <div class="stat-card">
+      <!-- Thanh tùy chọn toàn cục -->
+      <div class="toolbar-global">
+        <div class="toolbar-group">
+          <strong style="color:#001c80;"><i class="fas fa-sliders-h"></i> Tùy chỉnh hiển thị:</strong>
+          <label for="decimalSelect">Làm tròn:</label>
+          <select id="decimalSelect">
+            <option value="2">2 chữ số</option>
+            <option value="3">3 chữ số</option>
+            <option value="4" selected>4 chữ số</option>
+            <option value="6">6 chữ số</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <label for="percentileInput">Tính phân vị P<sub>k</sub> (k%):</label>
+          <input type="number" id="percentileInput" min="1" max="99" value="90" style="width: 75px;">
+        </div>
+      </div>
+
+      <!-- 4 Tabs chức năng -->
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="raw"><i class="fas fa-list-ol"></i> 1. Không ghép nhóm</button>
+        <button type="button" class="tab-btn" data-tab="grouped"><i class="fas fa-layer-group"></i> 2. Ghép nhóm (SGK)</button>
+        <button type="button" class="tab-btn" data-tab="regression"><i class="fas fa-chart-line"></i> 3. Hồi quy &amp; Tương quan</button>
+        <button type="button" class="tab-btn" data-tab="probability"><i class="fas fa-dice"></i> 4. Xác suất &amp; Phân phối</button>
+      </div>
+
+      <!-- Khu vực thông báo -->
+      <div id="alertBox"></div>
+
+      <!-- TAB 1: MẪU KHÔNG GHÉP NHÓM -->
+      <div id="tab-raw" class="tab-panel active">
+        <div class="input-box">
+          <label for="rawDataInput"><i class="fas fa-keyboard"></i> Nhập dãy số liệu (cách nhau bằng dấu phẩy, chấm phẩy, khoảng trắng hoặc xuống dòng):</label>
+          <textarea id="rawDataInput" placeholder="Ví dụ: 7.5, 8, 6.5, 9, 8.5, 7, 8, 9.5, 6, 8, 7.5, 10"></textarea>
+
+          <div class="options-row">
+            <label>
+              <i class="fas fa-filter" style="color:#001c80;"></i> Phát hiện ngoại lệ:
+              <select id="outlierMethod">
+                <option value="iqr" selected>Quy tắc IQR (1.5 × ΔQ)</option>
+                <option value="zscore">Quy tắc Z-score (|z| &gt; 2.5)</option>
+              </select>
+            </label>
+            <label>
+              <input type="checkbox" id="autoBinCheck"> Tự động gom nhóm Histogram (Quy tắc Sturges)
+            </label>
+          </div>
+
+          <div class="action-bar">
+            <button type="button" class="btn" id="btnCalcRaw"><i class="fas fa-calculator"></i> Phân tích</button>
+            <button type="button" class="btn btn-outline" id="btnRemoveOutliers"><i class="fas fa-broom"></i> Loại bỏ ngoại lệ &amp; Tính lại</button>
+            <button type="button" class="btn btn-outline" id="btnSampleRaw"><i class="fas fa-flask"></i> Dữ liệu mẫu</button>
+            <label class="btn btn-outline" for="csvFileInput" style="cursor:pointer; margin:0;">
+              <i class="fas fa-file-import"></i> Nhập .CSV/.TXT
+            </label>
+            <input type="file" id="csvFileInput" accept=".csv,.txt">
+            <button type="button" class="btn btn-danger" id="btnClearRaw"><i class="fas fa-trash-alt"></i> Xóa</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MẪU GHÉP NHÓM -->
+      <div id="tab-grouped" class="tab-panel">
+        <div class="input-box">
+          <label><i class="fas fa-table"></i> Nhập các nhóm nửa khoảng [a<sub>i</sub> ; b<sub>i</sub>) và tần số n<sub>i</sub>:</label>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nhóm</th>
+                  <th>Đầu mút trái (a<sub>i</sub>)</th>
+                  <th>Đầu mút phải (b<sub>i</sub>)</th>
+                  <th>Tần số (n<sub>i</sub>)</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="groupTableBody"></tbody>
+            </table>
+          </div>
+          <div class="action-bar">
+            <button type="button" class="btn" id="btnCalcGrouped"><i class="fas fa-calculator"></i> Phân tích ghép nhóm</button>
+            <button type="button" class="btn btn-outline" id="btnAddRow"><i class="fas fa-plus"></i> Thêm nhóm</button>
+            <button type="button" class="btn btn-outline" id="btnSampleGrouped"><i class="fas fa-flask"></i> Dữ liệu mẫu</button>
+            <button type="button" class="btn btn-danger" id="btnClearGrouped"><i class="fas fa-trash-alt"></i> Xóa hết</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: HỒI QUY & TƯƠNG QUAN -->
+      <div id="tab-regression" class="tab-panel">
+        <div class="input-box">
+          <label><i class="fas fa-project-diagram"></i> Nhập các cặp số liệu (X, Y) để tìm phương trình hồi quy và hệ số tương quan:</label>
+          <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Biến độc lập (X)</th>
+                  <th>Biến phụ thuộc (Y)</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="regTableBody"></tbody>
+            </table>
+          </div>
+          <div class="options-row">
+            <label>
+              <i class="fas fa-wave-square" style="color:#001c80;"></i> Mô hình hồi quy:
+              <select id="regModelSelect">
+                <option value="linear" selected>Tuyến tính: y = ax + b</option>
+                <option value="quadratic">Bậc 2 (Parabol): y = ax² + bx + c</option>
+                <option value="exponential">Hàm mũ: y = a · e^(bx) (y &gt; 0)</option>
+              </select>
+            </label>
+          </div>
+          <div class="action-bar">
+            <button type="button" class="btn" id="btnCalcReg"><i class="fas fa-calculator"></i> Tính hồi quy</button>
+            <button type="button" class="btn btn-outline" id="btnAddRegRow"><i class="fas fa-plus"></i> Thêm cặp (X, Y)</button>
+            <button type="button" class="btn btn-outline" id="btnSampleReg"><i class="fas fa-flask"></i> Dữ liệu mẫu</button>
+            <button type="button" class="btn btn-danger" id="btnClearReg"><i class="fas fa-trash-alt"></i> Xóa hết</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: PHÂN PHỐI XÁC SUẤT -->
+      <div id="tab-probability" class="tab-panel">
+        <div class="input-box">
+          <label for="distTypeSelect"><i class="fas fa-bell"></i> Chọn loại phân phối xác suất:</label>
+          <select id="distTypeSelect" style="width:100%; max-width:360px; margin-bottom:16px;">
+            <option value="normal" selected>Phân phối Chuẩn N(μ, σ²)</option>
+            <option value="binomial">Phân phối Nhị thức B(n, p)</option>
+          </select>
+
+          <div id="normalInputs">
+            <div class="form-grid">
+              <div class="field">
+                <label for="normMean">Kỳ vọng (μ):</label>
+                <input type="number" step="any" id="normMean" value="0">
+              </div>
+              <div class="field">
+                <label for="normStd">Độ lệch chuẩn (σ &gt; 0):</label>
+                <input type="number" step="any" id="normStd" value="1">
+              </div>
+              <div class="field">
+                <label for="normA">Giá trị a (cận dưới / x):</label>
+                <input type="number" step="any" id="normA" value="-1">
+              </div>
+              <div class="field">
+                <label for="normB">Giá trị b (cận trên, tùy chọn):</label>
+                <input type="number" step="any" id="normB" value="1.5">
+              </div>
+            </div>
+          </div>
+
+          <div id="binomialInputs" style="display:none;">
+            <div class="form-grid">
+              <div class="field">
+                <label for="binomN">Số phép thử (n nguyên dương):</label>
+                <input type="number" step="1" min="1" max="150" id="binomN" value="20">
+              </div>
+              <div class="field">
+                <label for="binomP">Xác suất thành công (0 ≤ p ≤ 1):</label>
+                <input type="number" step="0.01" min="0" max="1" id="binomP" value="0.4">
+              </div>
+              <div class="field">
+                <label for="binomK">Số lần thành công cần tính (k):</label>
+                <input type="number" step="1" min="0" id="binomK" value="8">
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button type="button" class="btn" id="btnCalcProb"><i class="fas fa-calculator"></i> Tính xác suất &amp; Vẽ đồ thị</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Khu vực hiển thị kết quả -->
+    <div id="resultsSection" class="stat-card results-section">
+      <div class="sub-heading">
+        <span id="resultTitle"><i class="fas fa-chart-pie"></i> Kết quả phân tích</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="btnExportCSV"><i class="fas fa-file-csv"></i> Xuất CSV</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btnDownloadChart"><i class="fas fa-download"></i> Tải biểu đồ</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid"></div>
+      <div id="predictContainer" style="display:none;"></div>
+      <div id="extraInfoBox"></div>
+
+      <div class="visual-grid" id="visualGrid">
+        <div class="panel-card">
+          <div class="chart-controls">
+            <strong style="color:#001c80;" id="chartHeading"><i class="fas fa-chart-bar"></i> Biểu đồ phân bố</strong>
+            <div class="chart-type-group" id="chartSwitchGroup">
+              <button type="button" class="btn btn-sm chart-switch" data-type="bar">Cột</button>
+              <button type="button" class="btn btn-outline btn-sm chart-switch" data-type="line">Đường</button>
+              <button type="button" class="btn btn-outline btn-sm chart-switch" data-type="ogive">Tích lũy</button>
+              <button type="button" class="btn btn-outline btn-sm chart-switch" data-type="pie">Tròn</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="statChart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel-card" id="freqTablePanel">
+          <strong style="color:#001c80; display:block; margin-bottom:12px;" id="tableHeading">
+            <i class="fas fa-table"></i> Bảng phân bố chi tiết
+          </strong>
+          <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+            <table class="data-table">
+              <thead id="freqTableHead"></thead>
+              <tbody id="freqTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer gốc của RMA CLUB -->
+  <footer>
+    <div class="footer-container">
+      <h3>RMA CLUB - THPT Thống Linh</h3>
+      <p>
+        Câu lạc bộ Robot &amp; Toán học Ứng dụng - nơi học sinh nuôi dưỡng đam mê khoa học,
+        lập trình và sáng tạo.
+      </p>
+      <div class="social">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-github"></i></a>
+      </div>
+      <small>Được tạo bởi RMA CLUB - THPT Thống Linh.</small>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      let currentChart = null;
+      let currentChartType = 'bar';
+      let lastChartData = null;
+      let lastExportRows = [];
+      let activeTab = 'raw';
+
+      const alertBox = document.getElementById('alertBox');
+      const resultsSection = document.getElementById('resultsSection');
+      const resultTitle = document.getElementById('resultTitle');
+      const metricsGrid = document.getElementById('metricsGrid');
+      const extraInfoBox = document.getElementById('extraInfoBox');
+      const predictContainer = document.getElementById('predictContainer');
+      const visualGrid = document.getElementById('visualGrid');
+      const freqTablePanel = document.getElementById('freqTablePanel');
+      const freqTableHead = document.getElementById('freqTableHead');
+      const freqTableBody = document.getElementById('freqTableBody');
+      const chartHeading = document.getElementById('chartHeading');
+      const tableHeading = document.getElementById('tableHeading');
+      const chartSwitchGroup = document.getElementById('chartSwitchGroup');
+      const decimalSelect = document.getElementById('decimalSelect');
+      const percentileInput = document.getElementById('percentileInput');
+
+      const whiteBgPlugin = {
+        id: 'customCanvasBackgroundColor',
+        beforeDraw: (chart) => {
+          const { ctx } = chart;
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, chart.width, chart.height);
+          ctx.restore();
+        }
+      };
+
+      function getDigits() { return parseInt(decimalSelect.value, 10) || 4; }
+      function fmt(num, customDigits) {
+        if (num === null || num === undefined || Number.isNaN(num) || !Number.isFinite(num)) return '—';
+        const d = customDigits !== undefined ? customDigits : getDigits();
+        return Number(num.toFixed(d)).toString();
+      }
+      function showAlert(msg, type = 'danger') {
+        alertBox.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+      }
+      function clearAlert() { alertBox.innerHTML = ''; }
+
+      function recalcActiveTab() {
+        if (!resultsSection.classList.contains('visible')) return;
+        if (activeTab === 'raw') analyzeRawData();
+        else if (activeTab === 'grouped') analyzeGroupedData();
+        else if (activeTab === 'regression') analyzeRegression();
+        else if (activeTab === 'probability') analyzeProbability();
+      }
+
+      decimalSelect.addEventListener('change', recalcActiveTab);
+      percentileInput.addEventListener('change', () => {
+        if (activeTab === 'raw' && resultsSection.classList.contains('visible')) analyzeRawData();
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          activeTab = btn.dataset.tab;
+          document.getElementById('tab-' + activeTab).classList.add('active');
+          clearAlert();
+        });
+      });
+
+      function renderMetrics(items) {
+        metricsGrid.innerHTML = items.map(item => `
+          <div class="metric-card">
+            <div class="metric-label">${item.label}</div>
+            <div class="metric-value">${item.value}</div>
+            <div class="metric-note">${item.note || ''}</div>
+          </div>
+        `).join('');
+      }
+
+      function destroyChart() {
+        if (currentChart) {
+          currentChart.destroy();
+          currentChart = null;
+        }
+      }
+
+      function renderStandardChart(type) {
+        if (!lastChartData) return;
+        currentChartType = type;
+        destroyChart();
+
+        document.querySelectorAll('.chart-switch').forEach(btn => {
+          btn.classList.toggle('btn-outline', btn.dataset.type !== type);
+        });
+
+        const ctx = document.getElementById('statChart').getContext('2d');
+        const colors = [
+          '#001c80', '#1e40af', '#2563eb', '#3b82f6', '#60a5fa',
+          '#0d9488', '#14b8a6', '#f59e0b', '#ef4444', '#8b5cf6'
+        ];
+        const bgColors = lastChartData.labels.map((_, i) => colors[i % colors.length]);
+
+        if (type === 'pie') {
+          currentChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: lastChartData.labels,
+              datasets: [{ label: 'Tần số', data: lastChartData.counts, backgroundColor: bgColors }]
+            },
+            options: { responsive: true, maintainAspectRatio: false },
+            plugins: [whiteBgPlugin]
+          });
+        } else if (type === 'ogive') {
+          currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: lastChartData.labels,
+              datasets: [{
+                label: 'Tần suất tích lũy (%)',
+                data: lastChartData.cumPercents,
+                borderColor: '#001c80',
+                backgroundColor: 'rgba(0, 28, 128, 0.12)',
+                fill: true,
+                tension: 0.25,
+                pointRadius: 4
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } },
+            plugins: [whiteBgPlugin]
+          });
+        } else {
+          currentChart = new Chart(ctx, {
+            type: type,
+            data: {
+              labels: lastChartData.labels,
+              datasets: [{
+                label: 'Tần số (n)',
+                data: lastChartData.counts,
+                backgroundColor: type === 'bar' ? 'rgba(0, 28, 128, 0.78)' : 'rgba(0, 28, 128, 0.15)',
+                borderColor: '#001c80',
+                borderWidth: 2,
+                fill: type === 'line',
+                tension: 0.25
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } },
+            plugins: [whiteBgPlugin]
+          });
+        }
+      }
+
+      document.querySelectorAll('.chart-switch').forEach(btn => {
+        btn.addEventListener('click', () => renderStandardChart(btn.dataset.type));
+      });
+
+      function medianOfSorted(arr) {
+        const n = arr.length;
+        if (n === 0) return NaN;
+        const mid = Math.floor(n / 2);
+        return n % 2 === 1 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+      }
+
+      function percentileOfSorted(arr, p) {
+        if (arr.length === 0) return NaN;
+        const pos = (p / 100) * (arr.length - 1);
+        const base = Math.floor(pos);
+        const rest = pos - base;
+        return arr[base + 1] !== undefined ? arr[base] + rest * (arr[base + 1] - arr[base]) : arr[base];
+      }
+
+      function erf(x) {
+        const sign = x >= 0 ? 1 : -1;
+        x = Math.abs(x);
+        const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+        const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+        const t = 1.0 / (1.0 + p * x);
+        const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+        return sign * y;
+      }
+      function normalCDF(x, mu, sigma) {
+        return 0.5 * (1 + erf((x - mu) / (sigma * Math.SQRT2)));
+      }
+      function normalPDF(x, mu, sigma) {
+        return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+      }
+      function logFactorial(n) {
+        let sum = 0;
+        for (let i = 2; i <= n; i++) sum += Math.log(i);
+        return sum;
+      }
+      function binomialPMF(n, k, p) {
+        if (k < 0 || k > n) return 0;
+        if (p === 0) return k === 0 ? 1 : 0;
+        if (p === 1) return k === n ? 1 : 0;
+        const logComb = logFactorial(n) - logFactorial(k) - logFactorial(n - k);
+        return Math.exp(logComb + k * Math.log(p) + (n - k) * Math.log(1 - p));
+      }
+
+      function solveLinearSystem(A, B) {
+        const n = B.length;
+        const M = A.map((row, i) => [...row, B[i]]);
+        for (let i = 0; i < n; i++) {
+          let maxRow = i;
+          for (let k = i + 1; k < n; k++) {
+            if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) maxRow = k;
+          }
+          [M[i], M[maxRow]] = [M[maxRow], M[i]];
+          if (Math.abs(M[i][i]) < 1e-12) return null;
+          for (let k = i + 1; k < n; k++) {
+            const factor = M[k][i] / M[i][i];
+            for (let j = i; j <= n; j++) M[k][j] -= factor * M[i][j];
+          }
+        }
+        const x = new Array(n).fill(0);
+        for (let i = n - 1; i >= 0; i--) {
+          let sum = M[i][n];
+          for (let j = i + 1; j < n; j++) sum -= M[i][j] * x[j];
+          x[i] = sum / M[i][i];
+        }
+        return x;
+      }
+
+      /* TAB 1: MẪU KHÔNG GHÉP NHÓM */
+      function parseRawInput() {
+        const text = document.getElementById('rawDataInput').value.trim();
+        if (!text) return { error: 'Vui lòng nhập dãy số liệu.' };
+        const tokens = text.split(/[\s,;]+/).filter(Boolean);
+        const nums = [];
+        for (const t of tokens) {
+          const v = Number(t);
+          if (Number.isNaN(v)) return { error: `Giá trị không hợp lệ: "${t}". Dùng dấu chấm (.) cho số thập phân.` };
+          nums.push(v);
+        }
+        return { nums };
+      }
+
+      function getOutlierInfo(sorted, mean, stdPop, q1, q3, iqr) {
+        const method = document.getElementById('outlierMethod').value;
+        if (method === 'iqr') {
+          const low = q1 - 1.5 * iqr, high = q3 + 1.5 * iqr;
+          return {
+            outliers: sorted.filter(v => v < low || v > high),
+            clean: sorted.filter(v => v >= low && v <= high),
+            desc: `Ngưỡng IQR [${fmt(low, 2)}; ${fmt(high, 2)}]`
+          };
+        }
+        return {
+          outliers: stdPop > 0 ? sorted.filter(v => Math.abs((v - mean) / stdPop) > 2.5) : [],
+          clean: stdPop > 0 ? sorted.filter(v => Math.abs((v - mean) / stdPop) <= 2.5) : [...sorted],
+          desc: `Ngưỡng |Z-score| ≤ 2.5`
+        };
+      }
+
+      function analyzeRawData() {
+        clearAlert();
+        const parsed = parseRawInput();
+        if (parsed.error) {
+          showAlert(parsed.error);
+          resultsSection.classList.remove('visible');
+          return;
+        }
+        const nums = parsed.nums;
+        const n = nums.length;
+        const sorted = [...nums].sort((a, b) => a - b);
+        const sum = sorted.reduce((a, b) => a + b, 0);
+        const mean = sum / n;
+        const min = sorted[0], max = sorted[n - 1], range = max - min;
+
+        const q2 = medianOfSorted(sorted);
+        const lowerHalf = n === 1 ? sorted : sorted.slice(0, Math.floor(n / 2));
+        const upperHalf = n === 1 ? sorted : sorted.slice(n % 2 === 1 ? Math.floor(n / 2) + 1 : n / 2);
+        const q1 = medianOfSorted(lowerHalf);
+        const q3 = medianOfSorted(upperHalf);
+        const iqr = q3 - q1;
+        const pK = Math.min(99, Math.max(1, Number(percentileInput.value) || 90));
+        const pVal = percentileOfSorted(sorted, pK);
+
+        const sqDiff = sorted.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0);
+        const varPop = sqDiff / n;
+        const stdPop = Math.sqrt(varPop);
+        const varSample = n > 1 ? sqDiff / (n - 1) : NaN;
+        const stdSample = n > 1 ? Math.sqrt(varSample) : NaN;
+        const cv = mean !== 0 ? (stdPop / Math.abs(mean)) * 100 : NaN;
+        const sem = n > 1 ? stdSample / Math.sqrt(n) : NaN;
+        const ci95Half = n > 1 ? 1.96 * sem : NaN;
+
+        const m3 = sorted.reduce((acc, v) => acc + Math.pow(v - mean, 3), 0) / n;
+        const m4 = sorted.reduce((acc, v) => acc + Math.pow(v - mean, 4), 0) / n;
+        const skewness = stdPop > 0 ? m3 / Math.pow(stdPop, 3) : 0;
+        const kurtosis = stdPop > 0 ? (m4 / Math.pow(stdPop, 4)) - 3 : 0;
+
+        const allPos = sorted.every(v => v > 0);
+        const geoMean = allPos ? Math.exp(sorted.reduce((acc, v) => acc + Math.log(v), 0) / n) : NaN;
+        const harmMean = allPos ? n / sorted.reduce((acc, v) => acc + 1 / v, 0) : NaN;
+        const trimCount = Math.floor(n * 0.1);
+        const trimmedArr = sorted.slice(trimCount, n - trimCount);
+        const trimMean = trimmedArr.reduce((a, b) => a + b, 0) / trimmedArr.length;
+
+        const outInfo = getOutlierInfo(sorted, mean, stdPop, q1, q3, iqr);
+
+        const freqMap = new Map();
+        sorted.forEach(v => freqMap.set(v, (freqMap.get(v) || 0) + 1));
+        let maxF = 0;
+        freqMap.forEach(c => { if (c > maxF) maxF = c; });
+        const modes = [];
+        freqMap.forEach((c, v) => { if (c === maxF) modes.push(v); });
+        const modeText = (maxF === 1 && freqMap.size > 1) ? 'Không có' : modes.join(', ');
+
+        resultTitle.innerHTML = '<i class="fas fa-chart-pie"></i> Kết quả thống kê mẫu không ghép nhóm';
+        predictContainer.style.display = 'none';
+        visualGrid.classList.remove('single-col');
+        freqTablePanel.style.display = 'block';
+        chartSwitchGroup.style.display = 'flex';
+        chartHeading.innerHTML = '<i class="fas fa-chart-bar"></i> Biểu đồ phân bố';
+        tableHeading.innerHTML = '<i class="fas fa-table"></i> Bảng phân bố tần số';
+
+        renderMetrics([
+          { label: 'Cỡ mẫu (n)', value: n, note: `Tổng Σx = ${fmt(sum)}` },
+          { label: 'Trung bình cộng (x̄)', value: fmt(mean), note: `KTC 95%: ±${fmt(ci95Half)}` },
+          { label: 'Trung vị (Q₂ / Me)', value: fmt(q2), note: `Q₁ = ${fmt(q1)} | Q₃ = ${fmt(q3)}` },
+          { label: 'Mốt (Mo)', value: modeText, note: `Tần số lớn nhất: ${maxF}` },
+          { label: 'Phương sai mẫu (s²)', value: fmt(varSample), note: `Tổng thể σ² = ${fmt(varPop)}` },
+          { label: 'Độ lệch chuẩn mẫu (s)', value: fmt(stdSample), note: `Tổng thể σ = ${fmt(stdPop)}` },
+          { label: 'Khoảng biến thiên (R)', value: fmt(range), note: `Min = ${fmt(min)} | Max = ${fmt(max)}` },
+          { label: 'Khoảng tứ phân vị (ΔQ)', value: fmt(iqr), note: `Phân vị P${pK} = ${fmt(pVal)}` },
+          { label: 'Hệ số biến thiên (CV)', value: Number.isNaN(cv) ? '—' : fmt(cv, 2) + '%', note: `SEM = ${fmt(sem)}` },
+          { label: 'Độ lệch / Độ nhọn', value: `${fmt(skewness, 2)} / ${fmt(kurtosis, 2)}`, note: 'Skewness / Excess Kurtosis' }
+        ]);
+
+        extraInfoBox.innerHTML = `
+          <div class="alert alert-info">
+            <strong>Thông tin mở rộng:</strong><br>
+            • <strong>Trung bình nhân:</strong> ${fmt(geoMean)} &nbsp;|&nbsp; <strong>Trung bình điều hòa:</strong> ${fmt(harmMean)} &nbsp;|&nbsp; <strong>Trung bình cắt 10%:</strong> ${fmt(trimMean)}<br>
+            • <strong>Giá trị ngoại lệ (${outInfo.desc}):</strong> ${outInfo.outliers.length ? outInfo.outliers.join(', ') : 'Không phát hiện ngoại lệ'}
+          </div>
+        `;
+
+        const labels = [], counts = [], cumPercents = [];
+        lastExportRows = [['Giá trị / Nhóm', 'Tần số (n)', 'Tần suất (%)', 'Tích lũy (%)']];
+        let cum = 0;
+
+        if (document.getElementById('autoBinCheck').checked && range > 0) {
+          const k = Math.max(2, Math.ceil(1 + 3.322 * Math.log10(n)));
+          const width = range / k;
+          for (let i = 0; i < k; i++) {
+            const a = min + i * width;
+            const b = i === k - 1 ? max : min + (i + 1) * width;
+            const c = sorted.filter(v => i === k - 1 ? (v >= a && v <= b) : (v >= a && v < b)).length;
+            cum += c;
+            const pct = (c / n) * 100;
+            const cumPct = (cum / n) * 100;
+            const lbl = `[${fmt(a, 2)}; ${fmt(b, 2)}${i === k - 1 ? ']' : ')'}`;
+            labels.push(lbl);
+            counts.push(c);
+            cumPercents.push(Number(cumPct.toFixed(2)));
+            lastExportRows.push([lbl, c, fmt(pct, 2), fmt(cumPct, 2)]);
+          }
+        } else {
+          freqMap.forEach((c, v) => {
+            cum += c;
+            const pct = (c / n) * 100;
+            const cumPct = (cum / n) * 100;
+            labels.push(String(v));
+            counts.push(c);
+            cumPercents.push(Number(cumPct.toFixed(2)));
+            lastExportRows.push([v, c, fmt(pct, 2), fmt(cumPct, 2)]);
+          });
+        }
+
+        freqTableHead.innerHTML = '<tr><th>Giá trị / Nhóm</th><th>Tần số (n)</th><th>Tần suất (%)</th><th>Tích lũy (%)</th></tr>';
+        freqTableBody.innerHTML = lastExportRows.slice(1).map(r => `
+          <tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}%</td><td>${r[3]}%</td></tr>
+        `).join('');
+
+        lastChartData = { labels, counts, cumPercents };
+        resultsSection.classList.add('visible');
+        renderStandardChart(currentChartType || 'bar');
+      }
+
+      document.getElementById('btnCalcRaw').addEventListener('click', analyzeRawData);
+      document.getElementById('btnRemoveOutliers').addEventListener('click', () => {
+        const parsed = parseRawInput();
+        if (parsed.error) { showAlert(parsed.error); return; }
+        const sorted = [...parsed.nums].sort((a, b) => a - b);
+        const n = sorted.length;
+        const mean = sorted.reduce((a, b) => a + b, 0) / n;
+        const stdPop = Math.sqrt(sorted.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / n);
+        const q1 = medianOfSorted(n === 1 ? sorted : sorted.slice(0, Math.floor(n / 2)));
+        const q3 = medianOfSorted(n === 1 ? sorted : sorted.slice(n % 2 === 1 ? Math.floor(n / 2) + 1 : n / 2));
+        const outInfo = getOutlierInfo(sorted, mean, stdPop, q1, q3, q3 - q1);
+
+        if (!outInfo.outliers.length) {
+          showAlert('Dữ liệu hiện tại không có giá trị ngoại lệ nào để loại bỏ.', 'info');
+          return;
+        }
+        document.getElementById('rawDataInput').value = outInfo.clean.join(', ');
+        analyzeRawData();
+        showAlert(`Đã loại bỏ ${outInfo.outliers.length} giá trị ngoại lệ (${outInfo.outliers.join(', ')}) và tính toán lại.`, 'success');
+      });
+      document.getElementById('btnSampleRaw').addEventListener('click', () => {
+        document.getElementById('rawDataInput').value = '7.5, 8, 6.5, 9, 8.5, 7, 8, 9.5, 6, 8, 7.5, 10, 7, 8.5, 9, 2.5';
+        analyzeRawData();
+      });
+      document.getElementById('btnClearRaw').addEventListener('click', () => {
+        document.getElementById('rawDataInput').value = '';
+        resultsSection.classList.remove('visible');
+        clearAlert();
+      });
+      document.getElementById('csvFileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('rawDataInput').value = ev.target.result;
+          analyzeRawData();
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      /* TAB 2: MẪU GHÉP NHÓM */
+      const groupTableBody = document.getElementById('groupTableBody');
+
+      function addGroupRow(a = '', b = '', nVal = '') {
+        const idx = groupTableBody.children.length + 1;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx}</td>
+          <td><input type="number" step="any" class="g-a" value="${a}"></td>
+          <td><input type="number" step="any" class="g-b" value="${b}"></td>
+          <td><input type="number" step="1" min="0" class="g-n" value="${nVal}"></td>
+          <td><button type="button" class="remove-row-btn"><i class="fas fa-times"></i></button></td>
+        `;
+        tr.querySelector('.remove-row-btn').addEventListener('click', () => {
+          tr.remove();
+          Array.from(groupTableBody.children).forEach((row, i) => row.children[0].textContent = i + 1);
+        });
+        groupTableBody.appendChild(tr);
+      }
+
+      function loadSampleGrouped() {
+        groupTableBody.innerHTML = '';
+        [[150, 155, 4], [155, 160, 10], [160, 165, 18], [165, 170, 12], [170, 175, 6]].forEach(r => addGroupRow(r[0], r[1], r[2]));
+      }
+      loadSampleGrouped();
+
+      function groupedQuantile(groups, totalN, ratio) {
+        const target = totalN * ratio;
+        let cumPrev = 0;
+        for (const g of groups) {
+          if (cumPrev + g.n >= target && g.n > 0) {
+            return g.a + ((target - cumPrev) / g.n) * (g.b - g.a);
+          }
+          cumPrev += g.n;
+        }
+        return NaN;
+      }
+
+      function analyzeGroupedData() {
+        clearAlert();
+        const rows = Array.from(groupTableBody.children);
+        const groups = [];
+        for (let i = 0; i < rows.length; i++) {
+          const aStr = rows[i].querySelector('.g-a').value.trim();
+          const bStr = rows[i].querySelector('.g-b').value.trim();
+          const nStr = rows[i].querySelector('.g-n').value.trim();
+          if (aStr === '' && bStr === '' && nStr === '') continue;
+          const a = Number(aStr), b = Number(bStr), nVal = Number(nStr);
+          if (aStr === '' || bStr === '' || nStr === '' || Number.isNaN(a) || Number.isNaN(b) || Number.isNaN(nVal) || b <= a || nVal < 0) {
+            showAlert(`Dữ liệu không hợp lệ ở nhóm ${i + 1} (cần a < b và tần số ≥ 0).`);
+            return;
+          }
+          groups.push({ a, b, n: nVal, mid: (a + b) / 2 });
+        }
+        if (!groups.length) { showAlert('Vui lòng nhập ít nhất 1 nhóm hợp lệ.'); return; }
+        groups.sort((x, y) => x.a - y.a);
+        const totalN = groups.reduce((s, g) => s + g.n, 0);
+        if (totalN <= 0) { showAlert('Tổng tần số phải lớn hơn 0.'); return; }
+
+        const mean = groups.reduce((s, g) => s + g.mid * g.n, 0) / totalN;
+        const varPop = groups.reduce((s, g) => s + g.n * Math.pow(g.mid - mean, 2), 0) / totalN;
+        const stdPop = Math.sqrt(varPop);
+        const q1 = groupedQuantile(groups, totalN, 0.25);
+        const q2 = groupedQuantile(groups, totalN, 0.5);
+        const q3 = groupedQuantile(groups, totalN, 0.75);
+        const iqr = q3 - q1;
+        const range = groups[groups.length - 1].b - groups[0].a;
+
+        let maxIdx = 0;
+        for (let i = 1; i < groups.length; i++) {
+          if (groups[i].n > groups[maxIdx].n) maxIdx = i;
+        }
+        const gM = groups[maxIdx];
+        const nPrev = maxIdx > 0 ? groups[maxIdx - 1].n : 0;
+        const nNext = maxIdx < groups.length - 1 ? groups[maxIdx + 1].n : 0;
+        const denom = (gM.n - nPrev) + (gM.n - nNext);
+        const mode = denom > 0 ? gM.a + ((gM.n - nPrev) / denom) * (gM.b - gM.a) : gM.mid;
+
+        resultTitle.innerHTML = '<i class="fas fa-layer-group"></i> Kết quả thống kê mẫu ghép nhóm';
+        predictContainer.style.display = 'none';
+        visualGrid.classList.remove('single-col');
+        freqTablePanel.style.display = 'block';
+        chartSwitchGroup.style.display = 'flex';
+        chartHeading.innerHTML = '<i class="fas fa-chart-bar"></i> Biểu đồ phân bố ghép nhóm';
+        tableHeading.innerHTML = '<i class="fas fa-table"></i> Bảng tần số ghép nhóm';
+
+        renderMetrics([
+          { label: 'Cỡ mẫu (n)', value: totalN, note: `Số nhóm: ${groups.length}` },
+          { label: 'Số trung bình (x̄)', value: fmt(mean), note: 'Tính theo giá trị đại diện' },
+          { label: 'Trung vị (Me / Q₂)', value: fmt(q2), note: `Q₁ = ${fmt(q1)} | Q₃ = ${fmt(q3)}` },
+          { label: 'Mốt (Mo)', value: fmt(mode), note: `Nhóm chứa mốt: [${gM.a}; ${gM.b})` },
+          { label: 'Phương sai (s²)', value: fmt(varPop), note: 'Theo công thức SGK' },
+          { label: 'Độ lệch chuẩn (s)', value: fmt(stdPop), note: `Khoảng biến thiên R = ${fmt(range)}` },
+          { label: 'Khoảng tứ phân vị (ΔQ)', value: fmt(iqr), note: 'Q₃ - Q₁' }
+        ]);
+        extraInfoBox.innerHTML = '';
+
+        const labels = [], counts = [], cumPercents = [];
+        lastExportRows = [['Nhóm', 'Giá trị đại diện', 'Tần số (n)', 'Tần suất (%)', 'Tích lũy (%)']];
+        let cum = 0;
+        groups.forEach(g => {
+          cum += g.n;
+          const pct = (g.n / totalN) * 100;
+          const cumPct = (cum / totalN) * 100;
+          const lbl = `[${g.a}; ${g.b})`;
+          labels.push(lbl);
+          counts.push(g.n);
+          cumPercents.push(Number(cumPct.toFixed(2)));
+          lastExportRows.push([lbl, fmt(g.mid), g.n, fmt(pct, 2), fmt(cumPct, 2)]);
+        });
+
+        freqTableHead.innerHTML = '<tr><th>Nhóm</th><th>Đại diện (c<sub>i</sub>)</th><th>Tần số (n<sub>i</sub>)</th><th>Tần suất (%)</th><th>Tích lũy (%)</th></tr>';
+        freqTableBody.innerHTML = lastExportRows.slice(1).map(r => `
+          <tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}%</td><td>${r[4]}%</td></tr>
+        `).join('');
+
+        lastChartData = { labels, counts, cumPercents };
+        resultsSection.classList.add('visible');
+        renderStandardChart(currentChartType || 'bar');
+      }
+
+      document.getElementById('btnAddRow').addEventListener('click', () => addGroupRow());
+      document.getElementById('btnSampleGrouped').addEventListener('click', () => { loadSampleGrouped(); analyzeGroupedData(); });
+      document.getElementById('btnClearGrouped').addEventListener('click', () => { groupTableBody.innerHTML = ''; addGroupRow(); resultsSection.classList.remove('visible'); });
+      document.getElementById('btnCalcGrouped').addEventListener('click', analyzeGroupedData);
+
+      /* TAB 3: HỒI QUY & TƯƠNG QUAN */
+      const regTableBody = document.getElementById('regTableBody');
+
+      function addRegRow(x = '', y = '') {
+        const idx = regTableBody.children.length + 1;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx}</td>
+          <td><input type="number" step="any" class="r-x" value="${x}"></td>
+          <td><input type="number" step="any" class="r-y" value="${y}"></td>
+          <td><button type="button" class="remove-row-btn"><i class="fas fa-times"></i></button></td>
+        `;
+        tr.querySelector('.remove-row-btn').addEventListener('click', () => {
+          tr.remove();
+          Array.from(regTableBody.children).forEach((row, i) => row.children[0].textContent = i + 1);
+        });
+        regTableBody.appendChild(tr);
+      }
+
+      function loadSampleReg() {
+        regTableBody.innerHTML = '';
+        [[1, 2.1], [2, 3.9], [3, 6.2], [4, 7.8], [5, 10.3], [6, 12.1]].forEach(p => addRegRow(p[0], p[1]));
+      }
+      loadSampleReg();
+
+      function analyzeRegression() {
+        clearAlert();
+        const pts = [];
+        Array.from(regTableBody.children).forEach(row => {
+          const xv = row.querySelector('.r-x').value.trim();
+          const yv = row.querySelector('.r-y').value.trim();
+          if (xv !== '' && yv !== '') {
+            const x = Number(xv), y = Number(yv);
+            if (!Number.isNaN(x) && !Number.isNaN(y)) pts.push({ x, y });
+          }
+        });
+        const model = document.getElementById('regModelSelect').value;
+        if (pts.length < (model === 'quadratic' ? 3 : 2)) {
+          showAlert('Cần ít nhất 2 cặp (hoặc 3 cặp với hồi quy bậc 2).');
+          return;
+        }
+        if (model === 'exponential' && pts.some(p => p.y <= 0)) {
+          showAlert('Mô hình hàm mũ yêu cầu tất cả giá trị Y > 0.');
+          return;
+        }
+
+        const n = pts.length;
+        const meanY = pts.reduce((s, p) => s + p.y, 0) / n;
+        let predictFn, eqText = '', rVal = NaN;
+
+        if (model === 'linear') {
+          const sx = pts.reduce((s, p) => s + p.x, 0);
+          const sy = pts.reduce((s, p) => s + p.y, 0);
+          const sxx = pts.reduce((s, p) => s + p.x * p.x, 0);
+          const syy = pts.reduce((s, p) => s + p.y * p.y, 0);
+          const sxy = pts.reduce((s, p) => s + p.x * p.y, 0);
+          const denomX = n * sxx - sx * sx;
+          const denomY = n * syy - sy * sy;
+          if (Math.abs(denomX) < 1e-12) { showAlert('Các giá trị X không được giống nhau hoàn toàn.'); return; }
+          const a = (n * sxy - sx * sy) / denomX;
+          const b = (sy - a * sx) / n;
+          rVal = denomY > 1e-12 ? (n * sxy - sx * sy) / Math.sqrt(denomX * denomY) : NaN;
+          predictFn = (x) => a * x + b;
+          eqText = `y = ${fmt(a)}x ${b >= 0 ? '+ ' + fmt(b) : '- ' + fmt(Math.abs(b))}`;
+        } else if (model === 'quadratic') {
+          let s1 = 0, s2 = 0, s3 = 0, s4 = 0, sy = 0, sxy = 0, sx2y = 0;
+          pts.forEach(p => {
+            const x2 = p.x * p.x;
+            s1 += p.x; s2 += x2; s3 += x2 * p.x; s4 += x2 * x2;
+            sy += p.y; sxy += p.x * p.y; sx2y += x2 * p.y;
+          });
+          const sol = solveLinearSystem([[s4, s3, s2], [s3, s2, s1], [s2, s1, n]], [sx2y, sxy, sy]);
+          if (!sol) { showAlert('Không thể giải hệ phương trình hồi quy bậc 2.'); return; }
+          const [a, b, c] = sol;
+          predictFn = (x) => a * x * x + b * x + c;
+          eqText = `y = ${fmt(a)}x² ${b >= 0 ? '+ ' + fmt(b) : '- ' + fmt(Math.abs(b))}x ${c >= 0 ? '+ ' + fmt(c) : '- ' + fmt(Math.abs(c))}`;
+        } else {
+          const sx = pts.reduce((s, p) => s + p.x, 0);
+          const sly = pts.reduce((s, p) => s + Math.log(p.y), 0);
+          const sxx = pts.reduce((s, p) => s + p.x * p.x, 0);
+          const sxly = pts.reduce((s, p) => s + p.x * Math.log(p.y), 0);
+          const denom = n * sxx - sx * sx;
+          if (Math.abs(denom) < 1e-12) { showAlert('Các giá trị X không được giống nhau hoàn toàn.'); return; }
+          const b = (n * sxly - sx * sly) / denom;
+          const a = Math.exp((sly - b * sx) / n);
+          predictFn = (x) => a * Math.exp(b * x);
+          eqText = `y = ${fmt(a)} · e^(${fmt(b)}x)`;
+        }
+
+        const ssRes = pts.reduce((s, p) => s + Math.pow(p.y - predictFn(p.x), 2), 0);
+        const ssTot = pts.reduce((s, p) => s + Math.pow(p.y - meanY, 2), 0);
+        const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 1;
+        const rmse = Math.sqrt(ssRes / n);
+
+        resultTitle.innerHTML = '<i class="fas fa-chart-line"></i> Kết quả hồi quy &amp; tương quan';
+        visualGrid.classList.remove('single-col');
+        freqTablePanel.style.display = 'block';
+        chartSwitchGroup.style.display = 'none';
+        chartHeading.innerHTML = '<i class="fas fa-chart-line"></i> Biểu đồ phân tán &amp; Đường hồi quy';
+        tableHeading.innerHTML = '<i class="fas fa-table"></i> Bảng sai số dự báo';
+
+        renderMetrics([
+          { label: 'Phương trình hồi quy', value: eqText, note: `Số cặp điểm n = ${n}` },
+          { label: 'Hệ số xác định (R²)', value: fmt(r2), note: `Giải thích ${fmt(r2 * 100, 2)}% biến thiên` },
+          { label: 'Hệ số tương quan (r)', value: Number.isNaN(rVal) ? '—' : fmt(rVal), note: model === 'linear' ? 'Tương quan Pearson' : 'Chỉ áp dụng tuyến tính' },
+          { label: 'Sai số RMSE', value: fmt(rmse), note: `Tổng bình phương sai số = ${fmt(ssRes)}` }
+        ]);
+
+        predictContainer.style.display = 'block';
+        predictContainer.innerHTML = `
+          <div class="predict-box">
+            <strong><i class="fas fa-magic"></i> Dự báo nhanh:</strong>
+            <label>Nhập X = <input type="number" step="any" id="predXInput" placeholder="VD: 7"></label>
+            <button type="button" class="btn btn-sm" id="btnRunPredict">Tính Y</button>
+            <strong id="predYResult" style="color:#001c80;"></strong>
+          </div>
+        `;
+        document.getElementById('btnRunPredict').addEventListener('click', () => {
+          const rawX = document.getElementById('predXInput').value.trim();
+          const resEl = document.getElementById('predYResult');
+          if (rawX === '' || Number.isNaN(Number(rawX))) {
+            resEl.textContent = 'Vui lòng nhập giá trị X hợp lệ.';
+            return;
+          }
+          resEl.textContent = `⇒ Y dự báo ≈ ${fmt(predictFn(Number(rawX)))}`;
+        });
+        extraInfoBox.innerHTML = '';
+
+        lastExportRows = [['X', 'Y thực tế', 'Y dự báo', 'Sai số (e)']];
+        pts.forEach(p => {
+          const yp = predictFn(p.x);
+          lastExportRows.push([p.x, p.y, fmt(yp), fmt(p.y - yp)]);
+        });
+        freqTableHead.innerHTML = '<tr><th>X</th><th>Y thực tế</th><th>Y dự báo</th><th>Sai số</th></tr>';
+        freqTableBody.innerHTML = lastExportRows.slice(1).map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+
+        destroyChart();
+        const minX = Math.min(...pts.map(p => p.x));
+        const maxX = Math.max(...pts.map(p => p.x));
+        const curvePts = [];
+        for (let i = 0; i <= 50; i++) {
+          const x = minX + (maxX - minX) * (i / 50);
+          curvePts.push({ x, y: predictFn(x) });
+        }
+        const ctx = document.getElementById('statChart').getContext('2d');
+        currentChart = new Chart(ctx, {
+          type: 'scatter',
+          data: {
+            datasets: [
+              { label: 'Dữ liệu thực tế', data: pts, backgroundColor: '#ef4444', pointRadius: 5 },
+              { label: 'Đường hồi quy', data: curvePts, type: 'line', borderColor: '#001c80', borderWidth: 2, pointRadius: 0, fill: false }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false },
+          plugins: [whiteBgPlugin]
+        });
+
+        resultsSection.classList.add('visible');
+      }
+
+      document.getElementById('btnAddRegRow').addEventListener('click', () => addRegRow());
+      document.getElementById('btnSampleReg').addEventListener('click', () => { loadSampleReg(); analyzeRegression(); });
+      document.getElementById('btnClearReg').addEventListener('click', () => { regTableBody.innerHTML = ''; addRegRow(); resultsSection.classList.remove('visible'); });
+      document.getElementById('btnCalcReg').addEventListener('click', analyzeRegression);
+
+      /* TAB 4: PHÂN PHỐI XÁC SUẤT */
+      const distTypeSelect = document.getElementById('distTypeSelect');
+      distTypeSelect.addEventListener('change', () => {
+        const isNorm = distTypeSelect.value === 'normal';
+        document.getElementById('normalInputs').style.display = isNorm ? 'block' : 'none';
+        document.getElementById('binomialInputs').style.display = isNorm ? 'none' : 'block';
+      });
+
+      function analyzeProbability() {
+        clearAlert();
+        const type = distTypeSelect.value;
+        predictContainer.style.display = 'none';
+        chartSwitchGroup.style.display = 'none';
+        visualGrid.classList.add('single-col');
+        freqTablePanel.style.display = 'none';
+        extraInfoBox.innerHTML = '';
+
+        if (type === 'normal') {
+          const mu = Number(document.getElementById('normMean').value);
+          const sigma = Number(document.getElementById('normStd').value);
+          const a = Number(document.getElementById('normA').value);
+          const bStr = document.getElementById('normB').value.trim();
+          const hasB = bStr !== '';
+          const b = hasB ? Number(bStr) : NaN;
+
+          if (Number.isNaN(mu) || Number.isNaN(sigma) || sigma <= 0 || Number.isNaN(a) || (hasB && Number.isNaN(b))) {
+            showAlert('Tham số phân phối chuẩn không hợp lệ (cần σ > 0).');
+            return;
+          }
+          const pLessA = normalCDF(a, mu, sigma);
+          const pGreaterA = Math.max(0, Math.min(1, 1 - pLessA));
+          const pBetween = hasB ? Math.abs(normalCDF(b, mu, sigma) - pLessA) : NaN;
+
+          resultTitle.innerHTML = '<i class="fas fa-bell"></i> Kết quả Phân phối Chuẩn N(μ, σ²)';
+          chartHeading.innerHTML = '<i class="fas fa-chart-area"></i> Đồ thị mật độ xác suất Chuẩn';
+
+          const metrics = [
+            { label: `P(X ≤ ${a})`, value: fmt(pLessA), note: `${fmt(pLessA * 100, 2)}%` },
+            { label: `P(X ≥ ${a})`, value: fmt(pGreaterA), note: `${fmt(pGreaterA * 100, 2)}%` },
+            { label: `Z-score tại a`, value: fmt((a - mu) / sigma), note: '(a - μ) / σ' }
+          ];
+          if (hasB) {
+            metrics.unshift({ label: `P(${Math.min(a, b)} ≤ X ≤ ${Math.max(a, b)})`, value: fmt(pBetween), note: `${fmt(pBetween * 100, 2)}%` });
+          }
+          renderMetrics(metrics);
+
+          destroyChart();
+          const labels = [], vals = [];
+          const start = mu - 4 * sigma, end = mu + 4 * sigma;
+          for (let i = 0; i <= 80; i++) {
+            const x = start + (end - start) * (i / 80);
+            labels.push(fmt(x, 2));
+            vals.push(normalPDF(x, mu, sigma));
+          }
+          lastExportRows = [['x', 'f(x)'], ...labels.map((l, i) => [l, fmt(vals[i], 6)])];
+
+          const ctx = document.getElementById('statChart').getContext('2d');
+          currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Mật độ f(x)',
+                data: vals,
+                borderColor: '#001c80',
+                backgroundColor: 'rgba(0, 28, 128, 0.18)',
+                fill: true,
+                pointRadius: 0
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false },
+            plugins: [whiteBgPlugin]
+          });
+        } else {
+          const n = parseInt(document.getElementById('binomN').value, 10);
+          const p = Number(document.getElementById('binomP').value);
+          const k = parseInt(document.getElementById('binomK').value, 10);
+          if (Number.isNaN(n) || n < 1 || n > 150 || Number.isNaN(p) || p < 0 || p > 1 || Number.isNaN(k) || k < 0 || k > n) {
+            showAlert('Tham số nhị thức không hợp lệ (1 ≤ n ≤ 150, 0 ≤ p ≤ 1, 0 ≤ k ≤ n).');
+            return;
+          }
+          const pEq = binomialPMF(n, k, p);
+          let pLe = 0;
+          const labels = [], probs = [];
+          for (let i = 0; i <= n; i++) {
+            const pr = binomialPMF(n, i, p);
+            if (i <= k) pLe += pr;
+            labels.push(String(i));
+            probs.push(pr);
+          }
+          pLe = Math.min(1, pLe);
+          const pGe = Math.max(0, Math.min(1, 1 - pLe + pEq));
+
+          resultTitle.innerHTML = '<i class="fas fa-dice"></i> Kết quả Phân phối Nhị thức B(n, p)';
+          chartHeading.innerHTML = '<i class="fas fa-chart-bar"></i> Đồ thị xác suất Nhị thức';
+
+          renderMetrics([
+            { label: `P(X = ${k})`, value: fmt(pEq), note: `${fmt(pEq * 100, 2)}%` },
+            { label: `P(X ≤ ${k})`, value: fmt(pLe), note: `${fmt(pLe * 100, 2)}%` },
+            { label: `P(X ≥ ${k})`, value: fmt(pGe), note: `${fmt(pGe * 100, 2)}%` },
+            { label: 'Kỳ vọng E(X) = np', value: fmt(n * p), note: `Độ lệch chuẩn σ = ${fmt(Math.sqrt(n * p * (1 - p)))}` }
+          ]);
+
+          lastExportRows = [['k', 'P(X = k)'], ...labels.map((l, i) => [l, fmt(probs[i], 6)])];
+
+          destroyChart();
+          const ctx = document.getElementById('statChart').getContext('2d');
+          currentChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'P(X = k)',
+                data: probs,
+                backgroundColor: labels.map((_, i) => i === k ? '#ef4444' : 'rgba(0, 28, 128, 0.72)')
+              }]
+            },
+            options: { responsive: true, maintainAspectRatio: false },
+            plugins: [whiteBgPlugin]
+          });
+        }
+        resultsSection.classList.add('visible');
+      }
+
+      document.getElementById('btnCalcProb').addEventListener('click', analyzeProbability);
+
+      /* XUẤT CSV & TẢI BIỂU ĐỒ */
+      document.getElementById('btnExportCSV').addEventListener('click', () => {
+        if (!lastExportRows.length) return;
+        const csv = '\uFEFF' + lastExportRows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'ket-qua-thong-ke-rma.csv';
+        link.click();
+      });
+
+      document.getElementById('btnDownloadChart').addEventListener('click', () => {
+        if (!currentChart) return;
+        const link = document.createElement('a');
+        link.href = currentChart.toBase64Image('image/png', 1);
+        link.download = 'bieu-do-thong-ke-rma.png';
+        link.click();
+      });
+    })();
+  </script>
+  <script src="rma-header.js"></script>
+</body>
+</html>
